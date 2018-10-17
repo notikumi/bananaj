@@ -115,6 +115,9 @@ buildNumber.properties
 # Ignore Gradle GUI config
 gradle-app.setting
 
+# Ignore gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.properties
+
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 

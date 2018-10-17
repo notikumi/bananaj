@@ -3,7 +3,7 @@ apply plugin: "maven"
 apply plugin: "maven-publish"
 apply plugin: 'signing'
 
-group = 'com.github.alexanderwe'
+group = 'com.notikumi'
 version = '0.5.1'
 
 description = 'A simple MailChimp API wrapper written in Java'
@@ -43,6 +43,7 @@ task fatJar(type: Jar) {
     with jar
 }
 
+/*
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -54,7 +55,8 @@ publishing {
             pom {
                 name = 'bananaj'
                 description = 'A simple MailChimp API wrapper written in Java'
-                url = 'https://github.com/alexanderwe/bananaj'
+                url = 'https://github.com/notikumi/bananaj'
+                
                 licenses {
                     license {
                         name = 'MIT'
@@ -68,12 +70,12 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:git://github.com/alexanderwe/bananaj.git'
-                    developerConnection = 'scm:git:git://github.com/alexanderwe/bananaj.git'
-                    url = 'https://github.com/alexanderwe/bananaj'
+                    connection = 'scm:git:git://github.com/notikumi/bananaj.git'
+                    developerConnection = 'scm:git:git://github.com/notikumi/bananaj.git'
+                    url = 'https://github.com/notikumi/bananaj'
                 }
                 issueManagement {
-                    url = 'https://github.com/alexanderwe/bananaj/issues'
+                    url = 'https://github.com/notikumi/bananaj/issues'
                     system = 'GitHub'
                 }
             }
@@ -90,7 +92,9 @@ publishing {
     }
 }
 
+
 signing {
     sign publishing.publications.mavenJava
 }
 
+*/
