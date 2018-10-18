@@ -5,11 +5,7 @@
 package com.github.alexanderwe.bananaj.model.list.member;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,7 +26,7 @@ import com.github.alexanderwe.bananaj.utils.EmailValidator;
 public class Member extends MailchimpObject{
 
 	private MailChimpList mailChimpList;
-    private HashMap<String, String> merge_fields;
+    private Map<String, Object> merge_fields;
 	private String unique_email_id;
 	private String email_address;
 	private MemberStatus status_if_new;
@@ -44,27 +40,82 @@ public class Member extends MailchimpObject{
 	private double avg_click_rate;
 	private String last_changed;
 	private List<MemberActivity> memberActivities;
-	private HashMap<String, Boolean> memberInterest;
+	private Map<String, Boolean> memberInterest;
 	private MailChimpConnection connection;
+
+
+    public Member(JSONObject member) {
+        super(member.getString("id"), member);
+
+        final JSONObject memberMergeFields = member.getJSONObject("merge_fields");
+        Map<String, Object> mergeFieldsData = new HashMap<>();
+        if (memberMergeFields != null) {
+            Iterator<String> mergeTagsI = memberMergeFields.keys();
+            while(mergeTagsI.hasNext()) {
+                String key = mergeTagsI.next();
+                // loop to get the dynamic key
+                mergeFieldsData.put(key, memberMergeFields.getString(key));
+            }
+        }
+        this.merge_fields = mergeFieldsData;
+
+       /*
+       //final JSONObject interests = member.getJSONObject("interests");
+       HashMap<String, Boolean> memberInterest = new HashMap<String, Boolean>();
+        if (interests != null) {
+            Iterator<String> interestsI = interests.keys();
+            while(interestsI.hasNext()) {
+                String key = interestsI.next();
+                boolean value = interests.getBoolean(key);
+                memberInterest.put(key,value);
+            }
+        }*/
+
+        //this.mailChimpList = mailChimpList;
+        this.unique_email_id = member.getString("unique_email_id");
+        this.email_address = member.getString("email_address");
+        if(member.has("status_if_new")) {
+            String value = member.getString("status_if_new");
+            if (value.length() > 0) {
+                this.status = MemberStatus.valueOf(member.getString("status_if_new").toUpperCase());
+            }
+        }
+        this.email_type =  EmailType.fromValue(member.getString("email_type"));
+        this.status = MemberStatus.valueOf(member.getString("status").toUpperCase());
+        this.timestamp_signup = member.getString("timestamp_signup");
+        this.timestamp_opt = member.getString("timestamp_opt");
+        this.ip_signup = member.getString("ip_signup");
+        this.ip_opt = member.getString("ip_opt");
+        this.last_changed = member.getString("last_changed");
+
+        final JSONObject memberStats = member.getJSONObject("stats");
+        this.avg_open_rate = memberStats.getDouble("avg_open_rate");
+        this.avg_click_rate = memberStats.getDouble("avg_click_rate");
+
+       // this.memberInterest = memberInterest;
+       // this.connection = mailChimpList.getConnection();
+    }
 
 
 	public Member(MailChimpList mailChimpList, JSONObject member) {
         super(member.getString("id"), member);
-    	final JSONObject memberMergeTags = member.getJSONObject("merge_fields");
-    	final JSONObject memberStats = member.getJSONObject("stats");
-    	final JSONObject interests = member.getJSONObject("interests");
 
-    	HashMap<String, String> merge_fields = new HashMap<String, String>();
+    	final JSONObject memberStats = member.getJSONObject("stats");
+
+        final JSONObject memberMergeTags = member.getJSONObject("merge_fields");
+    	HashMap<String, Object> mergeFields = new HashMap<>();
     	if (memberMergeTags != null) {
     		Iterator<String> mergeTagsI = memberMergeTags.keys();
     		while(mergeTagsI.hasNext()) {
     			String key = mergeTagsI.next();
     			// loop to get the dynamic key
-    			String value = memberMergeTags.getString(key);
-    			merge_fields.put(key, value);
+                mergeFields.put(key, memberMergeTags.getString(key));
     		}
     	}
+        this.merge_fields = mergeFields;
 
+    	/*
+    	final JSONObject interests = member.getJSONObject("interests");
     	HashMap<String, Boolean> memberInterest = new HashMap<String, Boolean>();
     	if (interests != null) {
 			Iterator<String> interestsI = interests.keys();
@@ -73,10 +124,9 @@ public class Member extends MailchimpObject{
 				boolean value = interests.getBoolean(key);
 				memberInterest.put(key,value);
 			}
-		}
+		}*/
     	
 		this.mailChimpList = mailChimpList;
-        this.merge_fields = merge_fields;
         this.unique_email_id = member.getString("unique_email_id");
         this.email_address = member.getString("email_address");
         if(member.has("status_if_new")) {
@@ -98,7 +148,7 @@ public class Member extends MailchimpObject{
         this.connection = mailChimpList.getConnection();
 	}
 	
-	public Member(String id, MailChimpList mailChimpList, HashMap<String, String> merge_fields, String unique_email_id, String email_address, MemberStatus status, String timestamp_signup, String ip_signup, String timestamp_opt, String ip_opt, double avg_open_rate, double avg_click_rate, String last_changed, MailChimpConnection connection, JSONObject jsonRepresentation){
+	public Member(String id, MailChimpList mailChimpList, Map<String, Object> merge_fields, String unique_email_id, String email_address, MemberStatus status, String timestamp_signup, String ip_signup, String timestamp_opt, String ip_opt, double avg_open_rate, double avg_click_rate, String last_changed, MailChimpConnection connection, JSONObject jsonRepresentation){
         super(id,jsonRepresentation);
         this.mailChimpList = mailChimpList;
         this.merge_fields = merge_fields;
@@ -285,7 +335,7 @@ public class Member extends MailchimpObject{
 	/**
 	 * @return the member interests. The map key is the interest/segment identifier and value is the subscription boolean.
 	 */
-	public HashMap<String, Boolean> getInterest() {
+	public Map<String, Boolean> getInterest() {
 		return memberInterest;
 	}
 
@@ -328,7 +378,7 @@ public class Member extends MailchimpObject{
 	/**
 	 * @return a HashMap of all merge fields
 	 */
-    public HashMap<String, String> getMerge_fields() {
+    public Map<String, Object> getMerge_fields() {
         return merge_fields;
     }
     
@@ -338,7 +388,7 @@ public class Member extends MailchimpObject{
      * @param value
      * @return the previous value associated with key, or null if there was none.)
      */
-	public String putMerge_fields(String key, String value) {
+	public Object putMerge_fields(String key, Object value) {
 		return merge_fields.put(key, value);
 	}
 
@@ -356,26 +406,27 @@ public class Member extends MailchimpObject{
 		return ip_opt;
 	}
 
-	@Override
-	public String toString(){
-		StringBuilder stringBuilder = new StringBuilder();
-		Iterator<Entry<String, String>> it = getMerge_fields().entrySet().iterator();
+    @Override
+    public String toString(){
+        StringBuilder stringBuilder = new StringBuilder();
+		Iterator<Map.Entry<String, Object>> it = getMerge_fields().entrySet().iterator();
 		while (it.hasNext()) {
-			Entry<String, String> pair = it.next();
+			Map.Entry<String, Object> pair = it.next();
 			stringBuilder.append(pair.getKey()).append(": ").append(pair.getValue()).append("\n");
-			it.remove(); // avoids a ConcurrentModificationException
 		}
 
-		return System.lineSeparator()+"ID: " + this.getId() + "\t"+  System.getProperty("line.separator")
-				+ "Unique email Address: " + this.getUnique_email_id() + System.getProperty("line.separator")
-				+ "Email address: " + this.getEmail_address() + System.getProperty("line.separator")
-				+ "Status: " + this.getStatus().getStringRepresentation() + System.getProperty("line.separator")
-				+ "Sign_Up: " + this.getTimestamp_signup() + System.getProperty("line.separator")
-				+ "Opt_In: " + this.getTimestamp_opt() + System.lineSeparator()
-				+ "Last changed: " + this.getLast_changed() + System.lineSeparator()
-				+ stringBuilder.toString()
-				+ "_________________________________________________";
-	}
+        return System.lineSeparator()+"ID: " + this.getId() + "\t"+  System.getProperty("line.separator")
+                + "Unique email Address: " + this.getUnique_email_id() + System.getProperty("line.separator")
+                + "Email address: " + this.getEmail_address() + System.getProperty("line.separator")
+                + "Status: " + this.getStatus().getStringRepresentation() + System.getProperty("line.separator")
+                + "Sign_Up: " + this.getTimestamp_signup() + System.getProperty("line.separator")
+                + "Opt_In: " + this.getTimestamp_opt() + System.lineSeparator()
+                + "Last changed: " + this.getLast_changed() + System.lineSeparator()
+                + stringBuilder.toString()
+                + "_________________________________________________";
+    }
 
-
+    public void setMerge_fields(Map<String, Object> merge_fields) {
+        this.merge_fields = merge_fields;
+    }
 }
