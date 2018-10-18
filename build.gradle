@@ -4,7 +4,7 @@ apply plugin: "maven-publish"
 apply plugin: 'signing'
 
 group = 'com.notikumi'
-version = '0.5.1'
+version = '0.6'
 
 description = 'A simple MailChimp API wrapper written in Java'
 

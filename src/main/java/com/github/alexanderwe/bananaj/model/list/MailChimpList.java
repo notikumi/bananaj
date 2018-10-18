@@ -8,10 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.json.JSONArray;
@@ -88,6 +86,11 @@ public class MailChimpList extends MailchimpObject {
 		this.connection = connection;
 	}
 
+
+    public List<Member> getAllMembers() throws Exception {
+        return getMembers(0,0);
+    }
+
 	/**
 	 * Get members in this list with pagination
 	 * @param count Number of members to return or 0 to return all members
@@ -99,17 +102,12 @@ public class MailChimpList extends MailchimpObject {
 
 		ArrayList<Member> members = new ArrayList<Member>();
 		final JSONObject list;
-		if(count != 0){
-			list = new JSONObject(getConnection().do_Get(new URL("https://"+connection.getServer()+".api.mailchimp.com/3.0/lists/"+this.getId()+"/members?count="+count+"&offset="+offset),connection.getApikey()));
-		} else {
-			list = new JSONObject(getConnection().do_Get(new URL("https://"+connection.getServer()+".api.mailchimp.com/3.0/lists/"+this.getId()+"/members?count="+this.getMembercount()+"&offset="+offset),connection.getApikey()));
-		}
+
+        list = new JSONObject(getConnection().do_Get(new URL("https://"+connection.getServer()+".api.mailchimp.com/3.0/lists/"+this.getId()+"/members?count="+count+"&offset="+offset),connection.getApikey()));
 
 		final JSONArray membersArray = list.getJSONArray("members");
 
-
-		for (int i = 0 ; i < membersArray.length();i++)
-		{
+		for (int i = 0 ; i < membersArray.length();i++) {
 			final JSONObject memberDetail = membersArray.getJSONObject(i);
 			final JSONObject memberMergeTags = memberDetail.getJSONObject("merge_fields");
 			final JSONObject memberStats = memberDetail.getJSONObject("stats");
@@ -123,8 +121,9 @@ public class MailChimpList extends MailchimpObject {
 				String value = memberMergeTags.getString(key);
 				merge_fields.put(key, value);
 			}
-			Member member = new Member(memberDetail.getString("id"),this,merge_fields,memberDetail.getString("unique_email_id"), memberDetail.getString("email_address"), MemberStatus.valueOf(memberDetail.getString("status").toUpperCase()),memberDetail.getString("timestamp_signup"),memberDetail.getString("ip_signup"),memberDetail.getString("timestamp_opt"),memberDetail.getString("ip_opt"),memberStats.getDouble("avg_open_rate"),memberStats.getDouble("avg_click_rate"),memberDetail.getString("last_changed"),this.getConnection(),memberDetail);
-			members.add(member);
+			//Member member = new Member(memberDetail.getString("id"),this,merge_fields,memberDetail.getString("unique_email_id"), memberDetail.getString("email_address"), MemberStatus.valueOf(memberDetail.getString("status").toUpperCase()),memberDetail.getString("timestamp_signup"),memberDetail.getString("ip_signup"),memberDetail.getString("timestamp_opt"),memberDetail.getString("ip_opt"),memberStats.getDouble("avg_open_rate"),memberStats.getDouble("avg_click_rate"),memberDetail.getString("last_changed"),this.getConnection(),memberDetail);
+			Member member = new Member(memberDetail);
+            members.add(member);
 
 		}
 		return members;
@@ -138,7 +137,7 @@ public class MailChimpList extends MailchimpObject {
 	 */
 	public Member getMember(String memberID) throws Exception{
 		final JSONObject member = new JSONObject(getConnection().do_Get(new URL("https://"+connection.getServer()+".api.mailchimp.com/3.0/lists/"+getId()+"/members/"+memberID),connection.getApikey()));
-    	return new Member(this, member);
+    	return new Member(member);
 	}
 	
 	/**
@@ -163,23 +162,22 @@ public class MailChimpList extends MailchimpObject {
 		}
 		json.put( "status", member.getStatus().getStringRepresentation());
 
-		{
-			JSONObject mergeFields = new JSONObject();
-			HashMap<String, String> mergeFieldsMap = member.getMerge_fields();
-			for (String key : mergeFieldsMap.keySet()) {
-				mergeFields.put(key, mergeFieldsMap.get(key));
-			}
-			json.put("merge_fields", mergeFields);
-		}
-		
-		{
-			JSONObject interests = new JSONObject();
-			HashMap<String, Boolean> interestsMap = member.getInterest();
-			for (String key : interestsMap.keySet()) {
-				interests.put(key, interestsMap.get(key));
-			}
-			json.put("interests",interests);
-		}
+        JSONObject mergeFields = new JSONObject();
+        Map<String, Object> mergeFieldsMap = member.getMerge_fields();
+        for (String key : mergeFieldsMap.keySet()) {
+            mergeFields.put(key, mergeFieldsMap.get(key));
+        }
+        json.put("merge_fields", mergeFields);
+
+        /*
+        JSONObject interests = new JSONObject();
+        HashMap<String, Boolean> interestsMap = member.getInterest();
+        for (String key : interestsMap.keySet()) {
+            interests.put(key, interestsMap.get(key));
+        }
+        json.put("interests",interests);
+        */
+        json.put("interests",new JSONObject());
 		json.put("ip_signup", member.getIp_signup());
 		json.put("timestamp_signup", member.getTimestamp_signup());
 		json.put( "ip_opt", member.getIp_opt());
@@ -202,7 +200,7 @@ public class MailChimpList extends MailchimpObject {
 	 * @param merge_fields_values
 	 * @throws Exception
 	 */
-	public void addMember(MemberStatus status, String emailAddress, HashMap<String, Object> merge_fields_values) throws Exception{
+	public void addMember(MemberStatus status, String emailAddress, Map<String, Object> merge_fields_values) throws Exception{
 		URL url = new URL(connection.getListendpoint()+"/"+this.getId()+"/members");
 		
 		JSONObject member = new JSONObject();
@@ -730,9 +728,9 @@ public class MailChimpList extends MailchimpObject {
 		if (show_merge){
 			int last_column = 9;
 
-			Iterator<Entry<String, String>> iter = members.get(0).getMerge_fields().entrySet().iterator();
+			Iterator<Entry<String, Object>> iter = members.get(0).getMerge_fields().entrySet().iterator();
 			while (iter.hasNext()) {
-				Entry<String, String> pair = iter.next();
+				Entry<String, Object> pair = iter.next();
 				sheet.addCell(new Label(last_column,0,pair.getKey(),times16format));
 				iter.remove(); // avoids a ConcurrentModificationException
 				last_column++;
@@ -757,10 +755,10 @@ public class MailChimpList extends MailchimpObject {
 			if (show_merge){
 				//add merge fields values
 				int last_index = 9;
-				Iterator<Entry<String, String>> iter_member = member.getMerge_fields().entrySet().iterator();
+				Iterator<Entry<String, Object>> iter_member = member.getMerge_fields().entrySet().iterator();
 				while (iter_member.hasNext()) {
-					Entry<String, String> pair = iter_member.next();
-					sheet.addCell(new Label(last_index,i+1,pair.getValue()));
+					Entry<String, Object> pair = iter_member.next();
+					sheet.addCell(new Label(last_index,i+1, pair.getValue().toString()));
 					iter_member.remove(); // avoids a ConcurrentModificationException
 					last_index++;
 
