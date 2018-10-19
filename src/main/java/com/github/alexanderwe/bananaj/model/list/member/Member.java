@@ -44,59 +44,6 @@ public class Member extends MailchimpObject{
 	private MailChimpConnection connection;
 
 
-    public Member(JSONObject member) {
-        super(member.getString("id"), member);
-
-        final JSONObject memberMergeFields = member.getJSONObject("merge_fields");
-        Map<String, Object> mergeFieldsData = new HashMap<>();
-        if (memberMergeFields != null) {
-            Iterator<String> mergeTagsI = memberMergeFields.keys();
-            while(mergeTagsI.hasNext()) {
-                String key = mergeTagsI.next();
-                // loop to get the dynamic key
-                mergeFieldsData.put(key, memberMergeFields.getString(key));
-            }
-        }
-        this.merge_fields = mergeFieldsData;
-
-       /*
-       //final JSONObject interests = member.getJSONObject("interests");
-       HashMap<String, Boolean> memberInterest = new HashMap<String, Boolean>();
-        if (interests != null) {
-            Iterator<String> interestsI = interests.keys();
-            while(interestsI.hasNext()) {
-                String key = interestsI.next();
-                boolean value = interests.getBoolean(key);
-                memberInterest.put(key,value);
-            }
-        }*/
-
-        //this.mailChimpList = mailChimpList;
-        this.unique_email_id = member.getString("unique_email_id");
-        this.email_address = member.getString("email_address");
-        if(member.has("status_if_new")) {
-            String value = member.getString("status_if_new");
-            if (value.length() > 0) {
-                this.status = MemberStatus.valueOf(member.getString("status_if_new").toUpperCase());
-            }
-        }
-        this.email_type =  EmailType.fromValue(member.getString("email_type"));
-        this.status = MemberStatus.valueOf(member.getString("status").toUpperCase());
-        this.timestamp_signup = member.getString("timestamp_signup");
-        this.timestamp_opt = member.getString("timestamp_opt");
-        this.ip_signup = member.getString("ip_signup");
-        this.ip_opt = member.getString("ip_opt");
-        this.last_changed = member.getString("last_changed");
-
-        final JSONObject memberStats = member.getJSONObject("stats");
-        this.avg_open_rate = memberStats.getDouble("avg_open_rate");
-        this.avg_click_rate = memberStats.getDouble("avg_click_rate");
-
-       // this.memberInterest = memberInterest;
-       // this.connection = mailChimpList.getConnection();
-    }
-
-
 	public Member(MailChimpList mailChimpList, JSONObject member) {
         super(member.getString("id"), member);
 
@@ -144,7 +91,7 @@ public class Member extends MailchimpObject{
         this.avg_open_rate = memberStats.getDouble("avg_open_rate");
         this.avg_click_rate = memberStats.getDouble("avg_click_rate");
         this.last_changed = member.getString("last_changed");
-        this.memberInterest = memberInterest;
+        this.memberInterest = new HashMap<String, Boolean>();
         this.connection = mailChimpList.getConnection();
 	}
 	

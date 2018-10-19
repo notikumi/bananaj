@@ -121,8 +121,7 @@ public class MailChimpList extends MailchimpObject {
 				String value = memberMergeTags.getString(key);
 				merge_fields.put(key, value);
 			}
-			//Member member = new Member(memberDetail.getString("id"),this,merge_fields,memberDetail.getString("unique_email_id"), memberDetail.getString("email_address"), MemberStatus.valueOf(memberDetail.getString("status").toUpperCase()),memberDetail.getString("timestamp_signup"),memberDetail.getString("ip_signup"),memberDetail.getString("timestamp_opt"),memberDetail.getString("ip_opt"),memberStats.getDouble("avg_open_rate"),memberStats.getDouble("avg_click_rate"),memberDetail.getString("last_changed"),this.getConnection(),memberDetail);
-			Member member = new Member(memberDetail);
+			Member member = new Member(this, memberDetail);
             members.add(member);
 
 		}
@@ -137,7 +136,7 @@ public class MailChimpList extends MailchimpObject {
 	 */
 	public Member getMember(String memberID) throws Exception{
 		final JSONObject member = new JSONObject(getConnection().do_Get(new URL("https://"+connection.getServer()+".api.mailchimp.com/3.0/lists/"+getId()+"/members/"+memberID),connection.getApikey()));
-    	return new Member(member);
+    	return new Member(this, member);
 	}
 	
 	/**
@@ -175,8 +174,8 @@ public class MailChimpList extends MailchimpObject {
         for (String key : interestsMap.keySet()) {
             interests.put(key, interestsMap.get(key));
         }
-        json.put("interests",interests);
-        */
+        json.put("interests",interests);*/
+
         json.put("interests",new JSONObject());
 		json.put("ip_signup", member.getIp_signup());
 		json.put("timestamp_signup", member.getTimestamp_signup());
