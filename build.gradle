@@ -4,7 +4,7 @@ apply plugin: "maven"
 apply plugin: 'signing'
 
 group = 'com.notikumi'
-version = '0.6.1'
+version = '0.6.2'
 archivesBaseName = "bananaj"
 
 description = 'A simple MailChimp API wrapper written in Java'

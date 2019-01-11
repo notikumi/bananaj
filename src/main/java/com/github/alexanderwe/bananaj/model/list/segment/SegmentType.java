@@ -10,7 +10,8 @@ public enum SegmentType {
 
     SAVED("saved"),
     STATIC("static"),
-    FUZZY("fuzzy");
+    FUZZY("fuzzy"),
+    CAMPAIGN_STATIC("campaign_static");
 
     private final String value;
     private final static Map<String, SegmentType> CONSTANTS = new HashMap<String, SegmentType>();

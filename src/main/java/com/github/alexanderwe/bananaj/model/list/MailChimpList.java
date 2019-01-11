@@ -408,7 +408,7 @@ public class MailChimpList extends MailchimpObject {
 							.conditionType(conditiontype)
 							.field(jsonCondition.getString("field"))
 							.operator(Operator.fromValue(jsonCondition.getString("op")))
-							.value(jsonCondition.getString("value"))
+							.value(jsonCondition.has("value") ? jsonCondition.getString("value") : null)
 							.build());
 					break;
 					
@@ -418,7 +418,7 @@ public class MailChimpList extends MailchimpObject {
 							.conditionType(conditiontype)
 							.field(jsonCondition.getString("field"))
 							.operator(Operator.fromValue(jsonCondition.getString("op")))
-							.value(jsonCondition.getInt("value"))
+							.value(jsonCondition.has("value") ? jsonCondition.getInt("value") : null)
 							.build());
 					break;
 					
@@ -432,7 +432,7 @@ public class MailChimpList extends MailchimpObject {
 							.conditionType(conditiontype)
 							.field(jsonCondition.getString("field"))
 							.operator(Operator.fromValue(jsonCondition.getString("op")))
-							.value(jsonCondition.getDouble("value"))
+							.value(jsonCondition.has("value") ?  jsonCondition.getDouble("value") : null)
 							.build());
 					break;
 					
@@ -444,7 +444,7 @@ public class MailChimpList extends MailchimpObject {
 							.field(jsonCondition.getString("field"))
 							.operator(Operator.fromValue(jsonCondition.getString("op")))
 							.extra(jsonCondition.getString("extra"))
-							.value(jsonCondition.getString("value"))
+							.value(jsonCondition.has("value") ? jsonCondition.getString("value") : null)
 							.build());
 					break;
 					
@@ -481,7 +481,7 @@ public class MailChimpList extends MailchimpObject {
 							.field(jsonCondition.getString("field"))
 							.operator(Operator.fromValue(jsonCondition.getString("op")))
 							.extra(jsonCondition.getInt("extra"))
-							.value(jsonCondition.getInt("value"))
+							.value(jsonCondition.has("value") ? jsonCondition.getInt("value") : null)
 							.build());
 					break;
 					
@@ -492,7 +492,7 @@ public class MailChimpList extends MailchimpObject {
 							.operator(Operator.fromValue(jsonCondition.getString("op")))
 							.lng(jsonCondition.getString("lng"))
 							.lat(jsonCondition.getString("lat"))
-							.value(jsonCondition.getInt("value"))
+							.value(jsonCondition.has("value") ? jsonCondition.getInt("value") : null)
 							.addr(jsonCondition.getString("addr"))
 							.build());
 					break;
@@ -578,11 +578,21 @@ public class MailChimpList extends MailchimpObject {
 			MergeFieldOptions mergeFieldOptions = new MergeFieldOptions();
 
 			switch(mergeFieldDetail.getString("type")){
-				case "address":mergeFieldOptions.setDefault_country(mergeFieldOptionsJSON.getInt("default_country"));break;
-				case "phone":mergeFieldOptions.setPhone_format(mergeFieldOptionsJSON.getString("phone_format"));break;
-				case "date":mergeFieldOptions.setDate_format(mergeFieldOptionsJSON.getString("date_format"));break;
-				case "birthday":mergeFieldOptions.setDate_format(mergeFieldOptionsJSON.getString("date_format"));break;
-				case "text":mergeFieldOptions.setSize(mergeFieldOptionsJSON.getInt("size"));break;
+				case "address":
+				    mergeFieldOptions.setDefault_country(mergeFieldOptionsJSON.getInt("default_country"));
+				    break;
+				case "phone":
+				    mergeFieldOptions.setPhone_format(mergeFieldOptionsJSON.has("phone_format") ? mergeFieldOptionsJSON.getString("phone_format") : null);
+				    break;
+				case "date":
+				    mergeFieldOptions.setDate_format(mergeFieldOptionsJSON.has("date_format") ? mergeFieldOptionsJSON.getString("date_format") : null);
+				    break;
+				case "birthday":
+				    mergeFieldOptions.setDate_format(mergeFieldOptionsJSON.has("date_format") ? mergeFieldOptionsJSON.getString("date_format") : null);
+				    break;
+				case "text":
+				    mergeFieldOptions.setSize(mergeFieldOptionsJSON.getInt("size"));
+				    break;
 				case "radio":
 					JSONArray mergeFieldOptionChoicesRadio = mergeFieldOptionsJSON.getJSONArray("choices");
 					ArrayList<String> choicesRadio = new ArrayList<String>();
